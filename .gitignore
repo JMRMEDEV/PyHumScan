@@ -1,5 +1,6 @@
 # Python cache
 /__pycache__/*
+/utils/__pycache__/*
 
 # Model Location (offline)
 /dlc-media/DLC_human_dancing_resnet_101_iteration-0_shuffle-1/*
