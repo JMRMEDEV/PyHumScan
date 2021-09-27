@@ -1,5 +1,5 @@
-import cv2
 import numpy as np
+from PIL import Image
 from pykinect2 import PyKinectRuntime, PyKinectV2
 
 kinect = None
@@ -31,20 +31,22 @@ def handle_color_frame():
     Acquire color frame from reader and transforms it for
     its correct analysis with deeplabcut-live
     """
-    color_frame = kinect.get_last_color_frame()
-    color_img = color_frame.reshape(((color_h, color_w, 4))).astype(np.uint8)
-    # Resize (1080, 1920, 4) into 600 width variable height
-    color_img = cv2.resize(color_img, (0,0), fx=0.312, fy=0.312)
-    # Convert img to NumPy array
-    color_img = np.array(color_img)
-    return color_img
+    if kinect.has_new_color_frame():
+        color_frame = kinect.get_last_color_frame()
+        color_img = color_frame.reshape(((color_h, color_w, 4))).astype(np.uint8)
+        color_img = Image.fromarray(color_img)
+        # Image resize for deeplabcut-live performance
+        color_img = color_img.resize((600, 338))
+        color_img = np.array(color_img)
+        return color_img
+    else:
+        return None
 
 def read_color_data():
     """
     Waits for sensor to acquire a color frame and it transforms
     it for deeplabcut-live integration
     """
-    while kinect.has_new_color_frame() == False:
-        color_frame = handle_color_frame()
+    color_frame = handle_color_frame()
 
     return color_frame    
