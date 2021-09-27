@@ -2,10 +2,10 @@ import os
 
 import cv2
 
-from utils.system_utils import get_date, get_miliseconds
+from utils.system_utils import get_date
 
 
-def save_data(dlcl_cfg, testing, poses_df, frames, data_save):
+def save_data(dlcl_cfg, testing, poses_list, frames, data_save):
     """
     Saves information of the pose detection process, might be
     jpg images and/or comma separated values
@@ -13,50 +13,35 @@ def save_data(dlcl_cfg, testing, poses_df, frames, data_save):
     # Save data as jpg images
     if data_save['frames']:
 
-        out_dir = "./output/images/labeled/"
+        out_dir = "./output/images/labeled/" + get_date()['date'] + "/" + get_date()['time'] + "/"
+        # If the specified path doesn't exist, create it
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
 
         if not testing:
 
-            out_img_file = os.path.normpath(
-                f"{out_dir}/{get_miliseconds()}_DLCLIVE_LABELED_.jpg"
-            )
             for i in range(len(frames)):
-                for joint_key, joint_values in poses_df.items():
-                    x = int(round(joint_values[0]))
-                    y = int(round(joint_values[1]))
-                    frame = cv2.circle(
-                        frames[i], (x, y), dlcl_cfg['display_radius'], (255,0,0), thickness=-1
-                    )
-                    cv2.imwrite(out_img_file, frame)
+                if poses_list[i] is not None:
+                    for joint_key, joint_values in poses_list[i].items():
+                        x = int(round(joint_values[0]))
+                        y = int(round(joint_values[1]))
+                        frame = cv2.circle(
+                            frames[i], (x, y), dlcl_cfg['display_radius'], (255,0,0), thickness=-1
+                        )
+                        out_img_file = os.path.normpath(f"{out_dir}_DLCLIVE_LABELED_{i}.jpg")
+                        cv2.imwrite(out_img_file, frame)
 
         else:
 
-            out_img_file = os.path.normpath(
-                f"{out_dir}/test_{get_date()}_DLCLIVE_LABELED_.jpg"
-            )
-            for i in range(len(frames)):
-                for joint_key, joint_values in poses_df.items():
+            for i in range(len(poses_list)):
+                for joint_key, joint_values in poses_list[i].items():
                     x = int(round(joint_values[0]))
                     y = int(round(joint_values[1]))
                     frame = cv2.circle(
                         frames[i], (x, y), dlcl_cfg['display_radius'], (255,0,0), thickness=-1
                     )
+                    out_img_file = os.path.normpath(f"{out_dir}_DLCLIVE_LABELED_test.jpg")
                     cv2.imwrite(out_img_file, frame)
 
-    # Save data as csv
+    # Save data as csv (to implement)
     # if data_save['csvs']:
-
-    #     out_dir = "./output/csv/"
-
-    #     if not testing:
-    #         poses_df.to_csv(
-    #             os.path.normpath(
-    #                 f"{out_dir}/{get_miliseconds()}_DLCLIVE_POSES.csv"
-    #             )
-    #         )
-    #     else:
-    #         poses_df.to_csv(
-    #             os.path.normpath(
-    #                 f"{out_dir}/test_{get_date()}_DLCLIVE_POSES.csv"
-    #             )
-    #         )

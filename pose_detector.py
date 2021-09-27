@@ -1,11 +1,15 @@
 import os
 
+import keyboard
 import numpy as np
 import pandas as pd
 import ruamel
 from dlclive import DLCLive
 from PIL import Image
-from kinect_handler import init_kinect, stop_kinect, read_color_data
+
+from kinect_handler import init_kinect, read_color_data, stop_kinect
+
+
 def dlcl_run(
     dlcl_cfg,
     testing=False
@@ -30,7 +34,7 @@ def dlcl_run(
     poses = detect_poses(dlcl_cfg, testing, live)
     return poses
 
-def detect_poses(dlcl_cfg, testing, live=None):
+def detect_poses(dlcl_cfg, testing, live):
     """
     Performs deeplabcut-live tensorflow operation
     """
@@ -52,10 +56,16 @@ def detect_poses(dlcl_cfg, testing, live=None):
         poses.append(live.get_pose(frame))
     else:
         init_kinect()
-        frame = read_color_data()
-        frames.append(frame)
-        poses.append(live.init_inference(frame))
-        poses.append(live.get_pose(frame))
+        while not keyboard.is_pressed('q'):
+            frame = read_color_data()
+            if frame is not None:
+                frames.append(frame)
+                poses.append(live.init_inference(frame))
+                poses.append(live.get_pose(frame))
+        print("\n\nColor frame aquiring stopped\n\n")
+
+    # Dispose Kinect sensor
+    stop_kinect()
 
     # Close tensorflow session
     live.close()
@@ -70,24 +80,29 @@ def detect_poses(dlcl_cfg, testing, live=None):
     pdindex = pd.MultiIndex.from_product(
         [bodyparts, ["x", "y", "likelihood"]], names=["bodyparts", "coords"]
     )
-    pose_df = pd.DataFrame(poses, columns=pdindex)
+    poses_df = pd.DataFrame(poses, columns=pdindex)
 
-    # We create a dictionary with the data that we are interested on
-    poses_dict = {
-        'forehead': (pose_df['forehead'].x[0].item(), pose_df['forehead'].y[0].item()),
-        'chin': (pose_df['chin'].x[0].item(), pose_df['chin'].y[0].item()),
-        'shoulder1': (pose_df['shoulder1'].x[0].item(), pose_df['shoulder1'].y[0].item()),
-        'shoulder2': (pose_df['shoulder2'].x[0].item(), pose_df['shoulder2'].y[0].item()),
-        'elbow1': (pose_df['elbow1'].x[0].item(), pose_df['elbow1'].y[0].item()),
-        'elbow2': (pose_df['elbow2'].x[0].item(), pose_df['elbow2'].y[0].item()),
-        'wrist1': (pose_df['wrist1'].x[0].item(), pose_df['wrist1'].y[0].item()),
-        'wrist2': (pose_df['wrist2'].x[0].item(), pose_df['wrist2'].y[0].item()),
-        'hip1': (pose_df['hip1'].x[0].item(), pose_df['hip1'].y[0].item()),
-        'hip2': (pose_df['hip2'].x[0].item(), pose_df['hip2'].y[0].item()),
-        'ankle1': (pose_df['ankle1'].x[0].item(), pose_df['ankle1'].y[0].item()),
-        'ankle2': (pose_df['ankle2'].x[0].item(), pose_df['ankle2'].y[0].item()),
-    }
+    poses_list = []
 
-    result = {'poses_df': poses_dict, 'frames': frames}
+    for i in range(poses_df.shape[0]):
+        # We create a dictionary with the data that we are interested on
+        poses_dict = {
+            'forehead': (poses_df['forehead'].x[i].item(), poses_df['forehead'].y[i].item()),
+            'chin': (poses_df['chin'].x[i].item(), poses_df['chin'].y[i].item()),
+            'shoulder1': (poses_df['shoulder1'].x[i].item(), poses_df['shoulder1'].y[i].item()),
+            'shoulder2': (poses_df['shoulder2'].x[i].item(), poses_df['shoulder2'].y[i].item()),
+            'elbow1': (poses_df['elbow1'].x[i].item(), poses_df['elbow1'].y[i].item()),
+            'elbow2': (poses_df['elbow2'].x[i].item(), poses_df['elbow2'].y[i].item()),
+            'wrist1': (poses_df['wrist1'].x[i].item(), poses_df['wrist1'].y[i].item()),
+            'wrist2': (poses_df['wrist2'].x[i].item(), poses_df['wrist2'].y[i].item()),
+            'hip1': (poses_df['hip1'].x[i].item(), poses_df['hip1'].y[i].item()),
+            'hip2': (poses_df['hip2'].x[i].item(), poses_df['hip2'].y[i].item()),
+            'ankle1': (poses_df['ankle1'].x[i].item(), poses_df['ankle1'].y[i].item()),
+            'ankle2': (poses_df['ankle2'].x[i].item(), poses_df['ankle2'].y[i].item()),
+        }
+        # We add the created dictionary as the last elment of poses_list
+        poses_list.append(poses_dict)
+
+    result = {'poses_list': poses_list, 'frames': frames}
 
     return result

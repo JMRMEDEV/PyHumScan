@@ -21,7 +21,7 @@ def main():
         'cmap': "bmy"
     }
     # We choose which data we want to storage in case we want to do so
-    data_save = {'frames': True, 'csvs': True}
+    data_save = {'frames': True, 'csvs': False}
     # We set either if we are performing a test or not
     testing = False
     # We start the processes with 's'
@@ -32,7 +32,7 @@ def main():
         result = dlcl_run(dlcl_cfg, testing)
 
     if result is not None:
-        save_data(dlcl_cfg, testing, result['poses_df'], result['frames'], data_save)
+        save_data(dlcl_cfg, testing, result['poses_list'], result['frames'], data_save)
         print("\n\nOperation Completed\n\n")
 
 if __name__ == "__main__":
