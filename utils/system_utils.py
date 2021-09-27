@@ -1,4 +1,5 @@
 from os import name, system
+import datetime
 import time
 
 def clear():
@@ -10,10 +11,10 @@ def clear():
         _ = system('clear')
 
 def get_date():
-    # Get current time for file naming
-    t = time.localtime()
-    current_time = time.strftime("%H_%M_%S", t)
-    return current_time
+    # Get current date for file naming
+    d = datetime.datetime.now()
+    current_date = {'date': d.strftime('%Y_%m_%w'), 'time': d.strftime('%H_%M_%S')}
+    return current_date
 
 def get_miliseconds():
     # Get miliseconds based on current time for file naming
