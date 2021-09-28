@@ -21,7 +21,7 @@ def main():
         'cmap': "bmy"
     }
     # We choose which data we want to storage in case we want to do so
-    data_save = {'frames': True, 'csvs': False}
+    data_save = {'frames': True, 'csvs': True}
     # We set either if we are performing a test or not
     testing = False
     # We start the processes with 's'

@@ -16,7 +16,7 @@ def get_date():
     current_date = {'date': d.strftime('%Y_%m_%w'), 'time': d.strftime('%H_%M_%S')}
     return current_date
 
-def get_miliseconds():
+def get_milliseconds():
     # Get miliseconds based on current time for file naming
     milli_sec = int(round(time.time() * 1000))
     return milli_sec

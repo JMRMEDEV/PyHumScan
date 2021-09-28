@@ -7,7 +7,7 @@ import ruamel
 from dlclive import DLCLive
 from PIL import Image
 
-from kinect_handler import init_kinect, read_color_data, stop_kinect
+from kinect_handler import init_kinect, read_data, stop_kinect
 
 
 def dlcl_run(
@@ -57,7 +57,7 @@ def detect_poses(dlcl_cfg, testing, live):
     else:
         init_kinect()
         while not keyboard.is_pressed('q'):
-            frame = read_color_data()
+            frame = read_data()
             if frame is not None:
                 frames.append(frame)
                 poses.append(live.init_inference(frame))
