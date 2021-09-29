@@ -7,7 +7,7 @@ import ruamel
 from dlclive import DLCLive
 from PIL import Image
 
-from kinect_handler import init_kinect, read_data, stop_kinect
+from kinect_handler import init_kinect, read_color_data, stop_kinect
 
 
 def dlcl_run(
@@ -39,30 +39,32 @@ def detect_poses(dlcl_cfg, testing, live):
     Performs deeplabcut-live tensorflow operation
     """
     poses = []
-    frames = []
+    color_frames = []
+    depth_frames = []
     # We might want to perform a project test for the given model
     if testing:
         # Open image from local source
         image = Image.open("./dlc-lf-media/human_frame.jpg")
         # Resize the image for optimal performance keeping aspect ratio
-        basewidth = 600
-        wpercent = (basewidth/float(image.size[0]))
-        hsize = int((float(image.size[1])*float(wpercent)))
-        rezised = image.resize((basewidth,hsize), Image.ANTIALIAS)
+        # basewidth = 600
+        # wpercent = (basewidth/float(image.size[0]))
+        # hsize = int((float(image.size[1])*float(wpercent)))
+        # rezised = image.resize((basewidth,hsize), Image.ANTIALIAS)
         # Convert image to NumPy array
-        frame = np.array(rezised)
-        frames.append(frame)
-        poses.append(live.init_inference(frame))
-        poses.append(live.get_pose(frame))
+        # frame = np.array(rezised)
+        # color_frames.append(frame)
+        # poses.append(live.init_inference(frame))
+        # poses.append(live.get_pose(frame))
     else:
         init_kinect()
         while not keyboard.is_pressed('q'):
-            frame = read_data()
-            if frame is not None:
-                frames.append(frame)
-                poses.append(live.init_inference(frame))
-                poses.append(live.get_pose(frame))
-        print("\n\nColor frame aquiring stopped\n\n")
+            color_dictionary, depth_frame = read_color_data()
+            if color_dictionary is not None and depth_frame is not None:
+                color_frames.append(color_dictionary)
+                depth_frames.append(depth_frame)
+                poses.append(live.init_inference(color_dictionary['resized']))
+                poses.append(live.get_pose(color_dictionary['resized']))
+        print("\n\nData aquiring stopped\n\n")
 
     # Dispose Kinect sensor
     stop_kinect()
@@ -103,6 +105,6 @@ def detect_poses(dlcl_cfg, testing, live):
         # We add the created dictionary as the last elment of poses_list
         poses_list.append(poses_dict)
 
-    result = {'poses_list': poses_list, 'frames': frames}
+    result = {'poses_list': poses_list, 'color_frames': color_frames, 'depth_frames': depth_frames}
 
     return result
