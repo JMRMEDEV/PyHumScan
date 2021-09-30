@@ -1,4 +1,7 @@
 import cv2
+import csv
+import os
+from utils.system_utils import get_date
 import numpy as np
 import open3d
 from PIL import Image
@@ -96,15 +99,38 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         flip_transform = [[1,0,0,0], [0,-1,0,0], [0,0,-1,0], [0,0,0,1]]
         point_cloud.transform(flip_transform)
 
-        # Merge XYZ coordinates and RGB colors
-        output_cloud = np.concatenate(
-            (np.asarray(point_cloud.points),
-            np.asarray(point_cloud.colors)), 
-            axis=1
-            )
+        colors_RGB = np.asarray(point_cloud.colors)
+        for row in range(colors_RGB.shape[0]):
+            for col in range(colors_RGB.shape[1]):
+                colors_RGB[row][col] = int(round((colors_RGB[row][col] * 255) / 1))
 
-        if data_save_cfg['colored_points']:
-            save_data(data_save_cfg, output_cloud)
+        print(colors_RGB)
+        # Merge XYZ coordinates and RGB colors
+        output_cloud = np.concatenate((np.asarray(point_cloud.points),colors_RGB), axis=1)
+
+        joint_points = np.array([252, 3, 152])
+
+        filteredData = output_cloud[np.all(output_cloud[:,3:6]==joint_points, axis=1)]
+
+        headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
+        out_dir = "./output/" + get_date()['date'] + "/"
+            # If the specified path doesn't exist, create it
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.csv")
+        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            writer.writerows(filteredData)
+
+        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_{get_date()['time']}.csv")
+        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            writer.writerows(output_cloud)
+
+        # if data_save_cfg['colored_points']:
+        #     save_data(data_save_cfg, output_cloud)
 
         # 0.988, 0.011, 0.596 (joint marker color)
 
