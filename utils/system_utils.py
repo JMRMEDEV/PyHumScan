@@ -13,7 +13,7 @@ def clear():
 def get_date():
     # Get current date for file naming
     d = datetime.datetime.now()
-    current_date = {'date': d.strftime('%Y_%m_%w'), 'time': d.strftime('%H_%M_%S')}
+    current_date = {'date': d.strftime('%Y_%m_%d'), 'time': d.strftime('%H_%M_%S')}
     return current_date
 
 def get_milliseconds():

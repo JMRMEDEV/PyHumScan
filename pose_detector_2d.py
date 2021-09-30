@@ -5,7 +5,6 @@ import pandas as pd
 import ruamel
 from dlclive import DLCLive
 
-from kinect_handler import read_color_data
 
 live = None
 

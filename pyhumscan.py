@@ -22,7 +22,13 @@ def main():
         'cmap': "bmy"
     }
     # We choose which data we want to storage in case we want to do so
-    data_save = {'frames': False, 'csvs': False}
+    data_save_cfg = {
+        'original': True,
+        'labeled_resized': True,
+        'labeled_original': {'image': True, 'csv': True},
+        'labeled_aligned': True,
+        'colored_points': {'pointcloud': True, 'csv': True}
+    }
     # We start the processes with 's'
     print("\n\nPlease, press 's' for starting data acquiring, press 'q' (focusing window) to quit\n\n")
     if keyboard.read_key() == 's':
@@ -37,7 +43,7 @@ def main():
                 color_dictionary, depth_frame = read_color_data()
             result = get_2d_poses(dlcl_cfg, color_dictionary)
             if result is not None:
-                poses_3d = get_3d_poses(dlcl_cfg, result, color_dictionary, depth_frame, kinect)
+                poses_3d = get_3d_poses(dlcl_cfg, data_save_cfg, result, color_dictionary, depth_frame, kinect)
                 #save_data(dlcl_cfg, testing, result['poses_list'], result['frames'], data_save)
         stop_kinect()
         dlcl_stop()

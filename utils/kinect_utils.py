@@ -1,31 +1,9 @@
 import numpy as np
 import open3d
 import ctypes
-from pykinect2 import PyKinectRuntime, PyKinectV2
 from pykinect2.PyKinectV2 import _ColorSpacePoint
 from PIL import Image
 
-# kinect = None
-# color_w = None
-# color_h = None
-# depth_w = None
-# depth_h = None
-
-# def set_kinect_instance():
-#     """
-#     Sets a new instance of kinect sensor for image align
-#     """
-#     global kinect
-#     kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-#                                             PyKinectV2.FrameSourceTypes_Depth)
-#     global color_w
-#     color_w = kinect.color_frame_desc.Width
-#     global color_h
-#     color_h = kinect.color_frame_desc.Height
-#     global depth_w
-#     depth_w = kinect.depth_frame_desc.Width
-#     global depth_h
-#     depth_h = kinect.depth_frame_desc.Height
 
 def get_align_color_image(kinect, color_img, color_height=1080, color_width=1920, depth_height=424, depth_width=512):
     """
@@ -60,14 +38,13 @@ def create_color_point_cloud(align_color_img, depth_img,
     align_color_img = align_color_img[:,:,0:3]
     # Convert opencv BGR to RGB
     align_color_img = align_color_img[...,::-1]
-    img = Image.fromarray(align_color_img)
-    img.show()
+    aligned_img = align_color_img
     rgbd_image = open3d.geometry.RGBDImage.create_from_color_and_depth(
         open3d.geometry.Image(align_color_img.copy()), 
-        open3d.geometry.Image(depth_img), 
+        open3d.geometry.Image(depth_img),
         depth_scale=1.0/depth_scale,
         depth_trunc=clipping_distance_in_meters,
         convert_rgb_to_intensity = False)
     pcd = open3d.geometry.PointCloud().create_from_rgbd_image(rgbd_image, intrinsic)
 
-    return pcd.points, pcd.colors
+    return pcd.points, pcd.colors, aligned_img
