@@ -1,7 +1,6 @@
 import numpy as np
 from PIL import Image
 from pykinect2 import PyKinectRuntime, PyKinectV2
-import cv2
 
 kinect = None
 color_w = None
@@ -24,6 +23,7 @@ def init_kinect():
     depth_w = kinect.depth_frame_desc.Width
     global depth_h
     depth_h = kinect.depth_frame_desc.Height
+    return kinect
 
 def stop_kinect():
     """
@@ -38,8 +38,6 @@ def handle_color_frame():
     """
     color_frame = kinect.get_last_color_frame()
     color_img = color_frame.reshape(((color_h, color_w, 4))).astype(np.uint8)
-    # Since OpenCV uses BGR as default color setting, we change it back to RGb
-    color_img = cv2.cvtColor(color_img, cv2.COLOR_BGR2RGB)
     # Image resize for deeplabcut-live performance
     color_img_resized = Image.fromarray(color_img)
     color_img_resized = color_img_resized.resize((600, 338))

@@ -1,24 +1,20 @@
 import os
 
-import keyboard
 import numpy as np
 import pandas as pd
 import ruamel
 from dlclive import DLCLive
-from PIL import Image
 
-from kinect_handler import init_kinect, read_color_data, stop_kinect
+from kinect_handler import read_color_data
 
+live = None
 
-def dlcl_run(
-    dlcl_cfg,
-    testing=False
-):
+def dlcl_start(dlcl_cfg):
     """
-    Analyze DeepLabCut-live exported model on a image frames:
-    Calculate poses' location in (x , y) coordinates
+    Set deeplabcut-live initial configuration
     """
 
+    global live
     live = DLCLive(
         dlcl_cfg['model_path'],
         tf_config=dlcl_cfg['tf_config'],
@@ -31,46 +27,21 @@ def dlcl_run(
         display_cmap=dlcl_cfg['cmap'],
     )
 
-    poses = detect_poses(dlcl_cfg, testing, live)
-    return poses
-
-def detect_poses(dlcl_cfg, testing, live):
+def dlcl_stop():
+    """"
+    Close tensorflow session
     """
-    Performs deeplabcut-live tensorflow operation
+    live.close()
+
+def get_2d_poses(dlcl_cfg, color_dictionary, ):
+    """
+    Analyze DeepLabCut-live exported model on a image frames:
+    Calculate poses' location in (x , y) coordinates
     """
     poses = []
-    color_frames = []
-    depth_frames = []
-    # We might want to perform a project test for the given model
-    if testing:
-        # Open image from local source
-        image = Image.open("./dlc-lf-media/human_frame.jpg")
-        # Resize the image for optimal performance keeping aspect ratio
-        # basewidth = 600
-        # wpercent = (basewidth/float(image.size[0]))
-        # hsize = int((float(image.size[1])*float(wpercent)))
-        # rezised = image.resize((basewidth,hsize), Image.ANTIALIAS)
-        # Convert image to NumPy array
-        # frame = np.array(rezised)
-        # color_frames.append(frame)
-        # poses.append(live.init_inference(frame))
-        # poses.append(live.get_pose(frame))
-    else:
-        init_kinect()
-        while not keyboard.is_pressed('q'):
-            color_dictionary, depth_frame = read_color_data()
-            if color_dictionary is not None and depth_frame is not None:
-                color_frames.append(color_dictionary)
-                depth_frames.append(depth_frame)
-                poses.append(live.init_inference(color_dictionary['resized']))
-                poses.append(live.get_pose(color_dictionary['resized']))
-        print("\n\nData aquiring stopped\n\n")
 
-    # Dispose Kinect sensor
-    stop_kinect()
-
-    # Close tensorflow session
-    live.close()
+    poses.append(live.init_inference(color_dictionary['resized']))
+    poses.append(live.get_pose(color_dictionary['resized']))
 
     # We read the retrieved data as HDF format
     cfg_path = os.path.normpath(f"{dlcl_cfg['model_path']}/pose_cfg.yaml")
@@ -105,6 +76,6 @@ def detect_poses(dlcl_cfg, testing, live):
         # We add the created dictionary as the last elment of poses_list
         poses_list.append(poses_dict)
 
-    result = {'poses_list': poses_list, 'color_frames': color_frames, 'depth_frames': depth_frames}
+    result = poses_list
 
     return result
