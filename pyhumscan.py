@@ -44,6 +44,7 @@ def main():
             result = get_2d_poses(dlcl_cfg, color_dictionary)
             if result is not None:
                 poses_3d = get_3d_poses(dlcl_cfg, data_save_cfg, result, color_dictionary, depth_frame, kinect)
+                print("\n\n", poses_3d, "\n\n")
                 #save_data(dlcl_cfg, testing, result['poses_list'], result['frames'], data_save)
         stop_kinect()
         dlcl_stop()

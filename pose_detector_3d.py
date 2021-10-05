@@ -7,6 +7,8 @@ import open3d
 from PIL import Image
 from utils.kinect_utils import get_align_color_image, create_color_point_cloud
 from utils.file_utils import save_data
+from utils.color_utils import get_joint_color
+from utils.cloud_utils import denormalize_RGB, get_joints_points
 
 def create_intrinsic():
     """
@@ -28,6 +30,10 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
     """
     # Final color frame with the calculated and drawn joints' coordinates
     labeled_img = None
+    RGB_ss = None
+    out_dir = "./output/" + get_date()['date'] + "/"
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
     # if data_save_cfg['original']:
     #     save_data(data_save_cfg, color_frames['original'])
     # # Tuples for saving the joints' information
@@ -60,19 +66,18 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
                 # Circle center coordinates
                 (x_original, y_original),
                 # Circle radius
-                int(round(dlcl_cfg['display_radius']*3.2)), 
-                # Color to use for drawing
-                (152, 3, 252),
+                int(round(dlcl_cfg['display_radius'])), 
+                # Color to use for drawing (BGR)
+                get_joint_color(joint_key),
                 # thickness = -1 tells to cv to fill the circle
                 # with the color
                 thickness=-1
             )
+            # RGB_ss = cv2.cvtColor(labeled, cv2.COLOR_BGR2RGB)
             labeled_img = Image.fromarray(labeled)
-    
-    # if data_save_cfg['labaled_resized']:
-    #     save_data(data_save_cfg, joints_resized)
-    # if data_save_cfg['labeled_original']:
-    #     save_data(data_save_cfg, data = {'joints': joints_original, 'image': labeled_img})
+
+    # RGB_img = Image.fromarray(RGB_ss)
+    # RGB_img.show()
         
     if labeled_img is not None and depth_frame is not None:
         labeled_img = np.array(labeled_img)
@@ -93,6 +98,9 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             clipping_distance_in_meters, 
             intrinsic
             )
+
+        aligned_img = Image.fromarray(aligned_img)
+        aligned_img.show()
         # if data_save_cfg['labeled_aligned']:
         #     save_data(data_save_cfg, aligned_img)
         # To convert [x,y,z] -> [x.-y,-z]
@@ -100,37 +108,29 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         point_cloud.transform(flip_transform)
 
         colors_RGB = np.asarray(point_cloud.colors)
-        for row in range(colors_RGB.shape[0]):
-            for col in range(colors_RGB.shape[1]):
-                colors_RGB[row][col] = int(round((colors_RGB[row][col] * 255) / 1))
-
-        print(colors_RGB)
+        colors_RGB = denormalize_RGB(colors_RGB)
         # Merge XYZ coordinates and RGB colors
         output_cloud = np.concatenate((np.asarray(point_cloud.points),colors_RGB), axis=1)
 
-        joint_points = np.array([252, 3, 152])
+        pose_3d, joints_cloud = get_joints_points(output_cloud)
+        return pose_3d
 
-        filteredData = output_cloud[np.all(output_cloud[:,3:6]==joint_points, axis=1)]
+        # To change code location
 
-        headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
-        out_dir = "./output/" + get_date()['date'] + "/"
-            # If the specified path doesn't exist, create it
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.csv")
-        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-            writer.writerows(filteredData)
+        # headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
+        # # If the specified path doesn't exist, create it
+        # out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.txt")
+        # with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(headers)
+        #     writer.writerows(joints_cloud)
 
-        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_{get_date()['time']}.csv")
-        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-            writer.writerows(output_cloud)
+        # out_txt_file = os.path.normpath(f"{out_dir}pointcloud_{get_date()['time']}.csv")
+        # with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(headers)
+        #     writer.writerows(output_cloud)
 
         # if data_save_cfg['colored_points']:
         #     save_data(data_save_cfg, output_cloud)
-
-        # 0.988, 0.011, 0.596 (joint marker color)
 
