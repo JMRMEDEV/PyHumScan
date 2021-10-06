@@ -1,6 +1,7 @@
-import os
-import cv2
 import csv
+import os
+
+import cv2
 
 from utils.system_utils import get_date
 

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def get_joint_centre(joint_cloud):
     """
     Calculates the average from the points in a given

@@ -5,7 +5,6 @@ import pandas as pd
 import ruamel
 from dlclive import DLCLive
 
-
 live = None
 
 def dlcl_start(dlcl_cfg):

@@ -1,8 +1,8 @@
+import ctypes
+
 import numpy as np
 import open3d
-import ctypes
 from pykinect2.PyKinectV2 import _ColorSpacePoint
-from PIL import Image
 
 
 def get_align_color_image(kinect, color_img, color_height=1080, color_width=1920, depth_height=424, depth_width=512):

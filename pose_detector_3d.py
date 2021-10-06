@@ -1,14 +1,17 @@
-import cv2
+import csv
 import os
-from utils.system_utils import get_date
+
+import cv2
 import numpy as np
 import open3d
 from PIL import Image
-from utils.kinect_utils import get_align_color_image, create_color_point_cloud
-from utils.file_utils import save_data
-from utils.color_utils import get_joint_color, denormalize_RGB
+
 from utils.cloud_utils import get_joints_points
-import csv
+from utils.color_utils import denormalize_RGB, get_joint_color
+from utils.file_utils import save_data
+from utils.kinect_utils import create_color_point_cloud, get_align_color_image
+from utils.system_utils import get_date
+
 
 def create_intrinsic():
     """
@@ -99,8 +102,8 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             intrinsic
             )
 
-        aligned_img = Image.fromarray(aligned_img)
-        aligned_img.show()
+        # aligned_img = Image.fromarray(aligned_img)
+        # aligned_img.show()
         # if data_save_cfg['labeled_aligned']:
         #     save_data(data_save_cfg, aligned_img)
         # To convert [x,y,z] -> [x.-y,-z]
