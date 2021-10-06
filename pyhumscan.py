@@ -14,7 +14,7 @@ def main():
     """
     # Set the configuration that will be used with deeplabcut-live
     dlcl_cfg = {
-        'model_path': "./dlc-media/DLC_human_dancing_resnet_101_iteration-0_shuffle-1",
+        'model_path': "./dlc-resources/DLC_human_dancing_resnet_101_iteration-0_shuffle-1",
         'tf_config': None,
         'resize': None,
         'dynamic': (False, 0.5, 10),
