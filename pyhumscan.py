@@ -1,28 +1,12 @@
+import cv2
 import keyboard
 
 from kinect_handler import init_kinect, read_color_data, stop_kinect
 from pose_detector_2d import dlcl_start, dlcl_stop, get_2d_poses
 from pose_detector_3d import get_3d_poses
+from utils.render_utils import render_3d
 from utils.system_utils import clear
-import plotly.graph_objects as go
-import numpy as np
-import cv2
-import io
-from PIL import Image
 
-
-def render_3d(joints_cloud):
-    # Extract the columns
-    x = [row[0] for row in joints_cloud]
-    y = [row[1] for row in joints_cloud]
-    z = [row[2] for row in joints_cloud]
-    fig = go.Figure(data=[go.Scatter3d(x=x, y=y, z=z,
-                                    mode='markers')])
-    img_bytes = fig.to_image(format="jpg", width=1280, height=720)
-    img = Image.open(io.BytesIO(img_bytes))
-    img_arr = np.array(img)
-    cv2.imshow('joints', img_arr)
-    cv2.waitKey(1)
 
 def main():
     """
