@@ -48,6 +48,9 @@ def render_3d(joints_cloud):
     # Set all the axes parameters, based on plotly for Python
     # documentation
     fig.update_scenes(
+        aspectratio_x=1.1544060464581725,
+        aspectratio_y=1.0451293568680509,
+        aspectratio_z=0.8288412562301049,
         xaxis_range=[-1, 1],
         xaxis_showgrid=False,
         xaxis_showbackground=False,

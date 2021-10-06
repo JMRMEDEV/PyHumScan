@@ -117,13 +117,13 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
 
         pose_3d, output_cloud = get_joints_points(output_cloud)
 
-        headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
-        # If the specified path doesn't exist, create it
-        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.txt")
-        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(headers)
-            writer.writerows(output_cloud)
+        # headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
+        # # If the specified path doesn't exist, create it
+        # out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.txt")
+        # with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(headers)
+        #     writer.writerows(output_cloud)
         
         return pose_3d, output_cloud
 
