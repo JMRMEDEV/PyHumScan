@@ -15,7 +15,10 @@ def render_3d(joints_cloud):
     x = [row[0] for row in joints_cloud]
     y = [row[1] for row in joints_cloud]
     z = [row[2] for row in joints_cloud]
+    # Load into a plotly figure the xs, ys, and sz and show them as
+    # markers (spheres)
     fig = go.Figure(data=[go.Scatter3d(x=x, y=y, z=z, mode='markers')])
+    # Set the plotly camera according to Kinect's frame orientation
     kinect_camera = dict(
         up=dict(
             x=-0.022634221477168148,
@@ -33,6 +36,7 @@ def render_3d(joints_cloud):
             z=1.7216858172237366
         )
     )
+    # Add the basic plotly layout configuration
     fig.update_layout(
         title_text="3D Joints",
         title_font_family="Arial",
@@ -41,6 +45,8 @@ def render_3d(joints_cloud):
         width=1139,
         height=527
     )
+    # Set all the axes parameters, based on plotly for Python
+    # documentation
     fig.update_scenes(
         xaxis_range=[-1, 1],
         xaxis_showgrid=False,
@@ -71,8 +77,14 @@ def render_3d(joints_cloud):
         zaxis_title_font_size=14,
         camera=kinect_camera
     )
+    # Since there are some troubles rendering with other
+    # methods, we convert the plotly chart into a jpg image
+    # in bytes
     img_bytes = fig.to_image(format="jpg")
+    # We open the generated image with PIL
     img = Image.open(io.BytesIO(img_bytes))
+    # We convert the image to an array, so open cv can
+    # interpret it
     img_arr = np.array(img)
     cv2.imshow('joints', img_arr)
     cv2.waitKey(1)
