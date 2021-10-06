@@ -37,12 +37,10 @@ def get_joint_centre(joint_cloud):
     for i in range(len(zs)):
         z = z + zs[i]
 
-    x = x / len(xs)
-    y = y / len(ys)
-    z = z / len(zs)
+    if len(xs) < 1 or len(ys) < 1 or len(zs) < 1:
+        return []
 
-    joint_centre = (x, y, z, joint_cloud[0][3], joint_cloud[0][4], joint_cloud[0][5])
-    joint_centre = np.asarray(joint_centre)
+    joint_centre = [x, y, z]
 
     return joint_centre
 
@@ -93,7 +91,7 @@ def get_joints_points(point_cloud):
     ankle2 = point_cloud[np.all(point_cloud[:,3:6] == np.array([156, 82, 220]), axis=1)]
     ankle2 = get_joint_centre(ankle2)
 
-    output_cloud = (
+    output_cloud = np.array([
         forehead,
         chin,
         shoulder1,
@@ -106,19 +104,27 @@ def get_joints_points(point_cloud):
         hip2,
         ankle1,
         ankle2
-    )
+    ])
 
-    pose3d['forehead'] = forehead[:3]
-    pose3d['chin'] = chin[:3]
-    pose3d['shoulder1'] = shoulder1[:3]
-    pose3d['shoulder2'] = shoulder2[:3]
-    pose3d['elbow1'] = elbow1[:3]
-    pose3d['elbow2'] = elbow2[:3]
-    pose3d['wrist1'] = wrist1[:3]
-    pose3d['wrist2'] = wrist2[:3]
-    pose3d['hip1'] = hip1[:3]
-    pose3d['hip2'] = hip2[:3]
-    pose3d['ankle1'] = ankle1[:3]
-    pose3d['ankle2'] = ankle2[:3]
+    joints_to_delete = []
+
+    for i in range(len(output_cloud)):
+        if len(output_cloud[i]) < 1:
+                joints_to_delete.append(i)
+
+    output_cloud = np.delete(output_cloud, joints_to_delete, 0)
+
+    pose3d['forehead'] = forehead
+    pose3d['chin'] = chin
+    pose3d['shoulder1'] = shoulder1
+    pose3d['shoulder2'] = shoulder2
+    pose3d['elbow1'] = elbow1
+    pose3d['elbow2'] = elbow2
+    pose3d['wrist1'] = wrist1
+    pose3d['wrist2'] = wrist2
+    pose3d['hip1'] = hip1
+    pose3d['hip2'] = hip2
+    pose3d['ankle1'] = ankle1
+    pose3d['ankle2'] = ankle2
 
     return pose3d, output_cloud

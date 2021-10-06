@@ -1,5 +1,4 @@
 import cv2
-import csv
 import os
 from utils.system_utils import get_date
 import numpy as np
@@ -99,8 +98,8 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             intrinsic
             )
 
-        aligned_img = Image.fromarray(aligned_img)
-        aligned_img.show()
+        # aligned_img = Image.fromarray(aligned_img)
+        # aligned_img.show()
         # if data_save_cfg['labeled_aligned']:
         #     save_data(data_save_cfg, aligned_img)
         # To convert [x,y,z] -> [x.-y,-z]
@@ -112,8 +111,9 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         # Merge XYZ coordinates and RGB colors
         output_cloud = np.concatenate((np.asarray(point_cloud.points),colors_RGB), axis=1)
 
-        pose_3d, joints_cloud = get_joints_points(output_cloud)
-        return pose_3d
+        pose_3d, output_cloud = get_joints_points(output_cloud)
+        
+        return pose_3d, output_cloud
 
         # To change code location
 

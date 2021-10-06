@@ -1,10 +1,28 @@
 import keyboard
 
+from kinect_handler import init_kinect, read_color_data, stop_kinect
 from pose_detector_2d import dlcl_start, dlcl_stop, get_2d_poses
 from pose_detector_3d import get_3d_poses
-from utils.file_utils import save_data
 from utils.system_utils import clear
-from kinect_handler import init_kinect, stop_kinect, read_color_data
+import plotly.graph_objects as go
+import numpy as np
+import cv2
+import io
+from PIL import Image
+
+
+def render_3d(joints_cloud):
+    # Extract the columns
+    x = [row[0] for row in joints_cloud]
+    y = [row[1] for row in joints_cloud]
+    z = [row[2] for row in joints_cloud]
+    fig = go.Figure(data=[go.Scatter3d(x=x, y=y, z=z,
+                                    mode='markers')])
+    img_bytes = fig.to_image(format="jpg", width=1280, height=720)
+    img = Image.open(io.BytesIO(img_bytes))
+    img_arr = np.array(img)
+    cv2.imshow('joints', img_arr)
+    cv2.waitKey(1)
 
 def main():
     """
@@ -30,7 +48,7 @@ def main():
         'colored_points': {'pointcloud': True, 'csv': True}
     }
     # We start the processes with 's'
-    print("\n\nPlease, press 's' for starting data acquiring, press 'q' (focusing window) to quit\n\n")
+    print("\n\nPlease, press 's' for starting data acquiring, press 'q' to quit\n\n")
     if keyboard.read_key() == 's':
         clear()
         print("\n\nHumanScan Backend\n\n")
@@ -43,11 +61,13 @@ def main():
                 color_dictionary, depth_frame = read_color_data()
             result = get_2d_poses(dlcl_cfg, color_dictionary)
             if result is not None:
-                poses_3d = get_3d_poses(dlcl_cfg, data_save_cfg, result, color_dictionary, depth_frame, kinect)
-                print("\n\n", poses_3d, "\n\n")
-                #save_data(dlcl_cfg, testing, result['poses_list'], result['frames'], data_save)
+                poses_3d, simple_cloud = get_3d_poses(dlcl_cfg, data_save_cfg, result, color_dictionary, depth_frame, kinect)
+                render_3d(simple_cloud)
+                # In here, we can choose what to do with the 3d pose data
+                # print("\n\n", poses_3d, "\n\n")
         stop_kinect()
         dlcl_stop()
+        cv2.destroyAllWindows()
         print("\n\nData aquiring stopped\n\n")
         print("\n\nOperation Completed\n\n")
 
