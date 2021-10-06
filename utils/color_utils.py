@@ -27,7 +27,13 @@ def get_joint_color(joint_name):
     if joint_name == "ankle2":
         return (220, 82, 156)
 
-def get_defined_joint():
+def denormalize_RGB(color_data):
     """
-    Returns a numpy array with the joint to track
+    Take all the colors from a cloud for converting
+    from 0-1 normalized RGB to 0-255 (non-normalized)
+    for implementing colored-joint detection algorithm
     """
+    for row in range(color_data.shape[0]):
+        for col in range(color_data.shape[1]):
+            color_data[row][col] = int(round((color_data[row][col] * 255) / 1))
+    return color_data

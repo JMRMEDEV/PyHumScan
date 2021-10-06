@@ -1,16 +1,5 @@
 import numpy as np
 
-def denormalize_RGB(color_data):
-    """
-    Take all the colors from a cloud for converting
-    from 0-1 normalized RGB to 0-255 (non-normalized)
-    for implementing colored-joint detection algorithm
-    """
-    for row in range(color_data.shape[0]):
-        for col in range(color_data.shape[1]):
-            color_data[row][col] = int(round((color_data[row][col] * 255) / 1))
-    return color_data
-
 def get_joint_centre(joint_cloud):
     """
     Calculates the average from the points in a given
@@ -23,26 +12,33 @@ def get_joint_centre(joint_cloud):
     y = 0
     z = 0
 
+    # Get all the xs, ys and sz
     for row in range(joint_cloud.shape[0]):
         xs.append(joint_cloud[row][0])
         ys.append(joint_cloud[row][1])
         zs.append(joint_cloud[row][2])
     
+    # Sum the values of the xs, ys and zs
     for i in range(len(xs)):
         x = x + xs[i]
-
     for i in range(len(ys)):
         y = y + ys[i]
-
     for i in range(len(zs)):
         z = z + zs[i]
 
+    # If a value of a coordinate is missingm the joint is
+    # not tracked
     if len(xs) < 1 or len(ys) < 1 or len(zs) < 1:
-        return []
+        return None
 
-    joint_centre = [x, y, z]
+    # Get the averages
+    x = x / len(xs)
+    y = y / len(ys)
+    z = z / len(zs)
 
-    return joint_centre
+    joint_centre_colored = [x, y, z, joint_cloud[row][3], joint_cloud[row][4], joint_cloud[row][5]]
+
+    return joint_centre_colored
 
 def get_joints_points(point_cloud):
     """
@@ -65,7 +61,9 @@ def get_joints_points(point_cloud):
         'ankle2': None
     }
 
-    # Remove all non-joint points
+    output_cloud = []
+
+    # Remove all non-joint points, based on its colors
     forehead = point_cloud[np.all(point_cloud[:,3:6] == np.array([250, 0, 0]), axis=1)]
     forehead = get_joint_centre(forehead)
     chin = point_cloud[np.all(point_cloud[:,3:6] == np.array([250, 250, 0]), axis=1)]
@@ -91,40 +89,42 @@ def get_joints_points(point_cloud):
     ankle2 = point_cloud[np.all(point_cloud[:,3:6] == np.array([156, 82, 220]), axis=1)]
     ankle2 = get_joint_centre(ankle2)
 
-    output_cloud = np.array([
-        forehead,
-        chin,
-        shoulder1,
-        shoulder2,
-        elbow1,
-        elbow2, 
-        wrist1,
-        wrist2,
-        hip1,
-        hip2,
-        ankle1,
-        ankle2
-    ])
-
-    joints_to_delete = []
-
-    for i in range(len(output_cloud)):
-        if len(output_cloud[i]) < 1:
-                joints_to_delete.append(i)
-
-    output_cloud = np.delete(output_cloud, joints_to_delete, 0)
-
-    pose3d['forehead'] = forehead
-    pose3d['chin'] = chin
-    pose3d['shoulder1'] = shoulder1
-    pose3d['shoulder2'] = shoulder2
-    pose3d['elbow1'] = elbow1
-    pose3d['elbow2'] = elbow2
-    pose3d['wrist1'] = wrist1
-    pose3d['wrist2'] = wrist2
-    pose3d['hip1'] = hip1
-    pose3d['hip2'] = hip2
-    pose3d['ankle1'] = ankle1
-    pose3d['ankle2'] = ankle2
+    # Only add to the data structures if is not undefined
+    if forehead is not None:
+        output_cloud.append(forehead)
+        pose3d['forehead'] = forehead
+    if chin is not None:
+        output_cloud.append(chin)
+        pose3d['chin'] = chin
+    if shoulder1 is not None:
+        output_cloud.append(shoulder1)
+        pose3d['shoulder1'] = shoulder1
+    if shoulder2 is not None:
+        output_cloud.append(shoulder2)
+        pose3d['shoulder2'] = shoulder2
+    if elbow1 is not None:
+        output_cloud.append(elbow1)
+        pose3d['elbow1'] = elbow1
+    if elbow2 is not None:
+        output_cloud.append(elbow2)
+        pose3d['elbow2'] = elbow2
+    if wrist1 is not None:
+        output_cloud.append(wrist1)
+        pose3d['wrist1'] = wrist1
+    if wrist2 is not None:
+        output_cloud.append(wrist2)
+        pose3d['wrist2'] = wrist2
+    if hip1 is not None:
+        output_cloud.append(hip1)
+        pose3d['hip1'] = hip1
+    if hip2 is not None:
+        output_cloud.append(hip2)
+        pose3d['hip2'] = hip2
+    if ankle1 is not None:
+        output_cloud.append(ankle1)
+        pose3d['ankle1'] = ankle1
+    if ankle2 is not None:
+        output_cloud.append(ankle2)
+        pose3d['ankle2'] = ankle2
 
     return pose3d, output_cloud

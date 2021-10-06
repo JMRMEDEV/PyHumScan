@@ -6,8 +6,9 @@ import open3d
 from PIL import Image
 from utils.kinect_utils import get_align_color_image, create_color_point_cloud
 from utils.file_utils import save_data
-from utils.color_utils import get_joint_color
-from utils.cloud_utils import denormalize_RGB, get_joints_points
+from utils.color_utils import get_joint_color, denormalize_RGB
+from utils.cloud_utils import get_joints_points
+import csv
 
 def create_intrinsic():
     """
@@ -98,8 +99,8 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             intrinsic
             )
 
-        # aligned_img = Image.fromarray(aligned_img)
-        # aligned_img.show()
+        aligned_img = Image.fromarray(aligned_img)
+        aligned_img.show()
         # if data_save_cfg['labeled_aligned']:
         #     save_data(data_save_cfg, aligned_img)
         # To convert [x,y,z] -> [x.-y,-z]
@@ -112,18 +113,18 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         output_cloud = np.concatenate((np.asarray(point_cloud.points),colors_RGB), axis=1)
 
         pose_3d, output_cloud = get_joints_points(output_cloud)
+
+        headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
+        # If the specified path doesn't exist, create it
+        out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.txt")
+        with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            writer.writerows(output_cloud)
         
         return pose_3d, output_cloud
 
         # To change code location
-
-        # headers = ['X', 'Y', 'Z', 'R', 'G', 'B']
-        # # If the specified path doesn't exist, create it
-        # out_txt_file = os.path.normpath(f"{out_dir}pointcloud_filtered_{get_date()['time']}.txt")
-        # with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
-        #     writer = csv.writer(f)
-        #     writer.writerow(headers)
-        #     writer.writerows(joints_cloud)
 
         # out_txt_file = os.path.normpath(f"{out_dir}pointcloud_{get_date()['time']}.csv")
         # with open(out_txt_file, 'w', encoding='UTF8', newline='') as f:
