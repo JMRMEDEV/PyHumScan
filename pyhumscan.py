@@ -25,11 +25,12 @@ def main():
     }
     # We choose which data we want to storage in case we want to do so
     data_save_cfg = {
-        "original": True,
-        "labeled_resized": True,
-        "labeled_original": {"image": True, "csv": True},
-        "labeled_aligned": True,
-        "colored_points": {"pointcloud": True, "csv": True},
+        "original": False,
+        "labeled_resized": False,
+        "labeled_original": False,
+        "labeled_aligned": False,
+        "colored_cloud": False,
+        "pose_3d": False,
     }
     # We start the processes with 's'
     print(

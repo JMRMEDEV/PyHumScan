@@ -47,9 +47,9 @@ def create_color_point_cloud(
     """
     # Only get the first three channel
     align_color_img = align_color_img[:, :, 0:3]
+    aligned_img = align_color_img
     # Convert opencv BGR to RGB
     align_color_img = align_color_img[..., ::-1]
-    aligned_img = align_color_img
     rgbd_image = open3d.geometry.RGBDImage.create_from_color_and_depth(
         open3d.geometry.Image(align_color_img.copy()),
         open3d.geometry.Image(depth_img),
