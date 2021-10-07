@@ -41,8 +41,8 @@ def get_3d_poses(
         for joint_key, joint_values in poses_list[i].items():
             # Calculates the coordinates of the detected joints for the
             # deeplabcut-live resized image
-            x_resized = int(joint_values[0])
-            y_resized = int(joint_values[1])
+            x_resized = joint_values[0]
+            y_resized = joint_values[1]
             # Create a list with the resized joints' coordinates and keys
             # in case we want to store them
             joint_info_resized = [joint_key, x_resized, y_resized]
