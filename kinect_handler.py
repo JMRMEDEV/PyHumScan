@@ -8,13 +8,15 @@ color_h = None
 depth_w = None
 depth_h = None
 
+
 def init_kinect():
     """
     Initializes the sensor and its data readers
     """
     global kinect
-    kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-                                            PyKinectV2.FrameSourceTypes_Depth)
+    kinect = PyKinectRuntime.PyKinectRuntime(
+        PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Depth
+    )
     global color_w
     color_w = kinect.color_frame_desc.Width
     global color_h
@@ -25,11 +27,13 @@ def init_kinect():
     depth_h = kinect.depth_frame_desc.Height
     return kinect
 
+
 def stop_kinect():
     """
     Disposes the sensor.
     """
     kinect.close()
+
 
 def handle_color_frame():
     """
@@ -42,10 +46,11 @@ def handle_color_frame():
     color_img_resized = Image.fromarray(color_img)
     color_img_resized = color_img_resized.resize((600, 338))
     color_img_resized = np.array(color_img_resized)
-    # Use the resized image for deeplabcut-live performance, 
+    # Use the resized image for deeplabcut-live performance,
     # keep the orginal one for 3D pose estimation
-    color_dictionary = {'resized': color_img_resized, 'original': color_img}
+    color_dictionary = {"resized": color_img_resized, "original": color_img}
     return color_dictionary
+
 
 def handle_depth_frame():
     """
@@ -56,6 +61,7 @@ def handle_depth_frame():
     # deeplab-cut live
     depth_img = depth_frame.reshape(((depth_h, depth_w))).astype(np.uint16)
     return depth_img
+
 
 def read_color_data():
     """

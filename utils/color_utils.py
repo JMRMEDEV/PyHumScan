@@ -27,6 +27,7 @@ def get_joint_color(joint_name):
     if joint_name == "ankle2":
         return (220, 82, 156)
 
+
 def denormalize_RGB(color_data):
     """
     Take all the colors from a cloud for converting

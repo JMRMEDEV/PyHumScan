@@ -17,24 +17,14 @@ def render_3d(joints_cloud):
     z = [row[2] for row in joints_cloud]
     # Load into a plotly figure the xs, ys, and sz and show them as
     # markers (spheres)
-    fig = go.Figure(data=[go.Scatter3d(x=x, y=y, z=z, mode='markers')])
+    fig = go.Figure(data=[go.Scatter3d(x=x, y=y, z=z, mode="markers")])
     # Set the plotly camera according to Kinect's frame orientation
     kinect_camera = dict(
-        up=dict(
-            x=-0.022634221477168148,
-            y=0.9068314497962958,
-            z=-0.42088527377240326
-        ),
+        up=dict(x=-0.022634221477168148, y=0.9068314497962958, z=-0.42088527377240326),
         center=dict(
-            x=0.21556439444543313,
-            y=-0.21508937010308798,
-            z=-0.08172521732195626
+            x=0.21556439444543313, y=-0.21508937010308798, z=-0.08172521732195626
         ),
-        eye=dict(
-            x=0.12639005765507016,
-            y=0.6196972437489059,
-            z=1.7216858172237366
-        )
+        eye=dict(x=0.12639005765507016, y=0.6196972437489059, z=1.7216858172237366),
     )
     # Add the basic plotly layout configuration
     fig.update_layout(
@@ -43,7 +33,7 @@ def render_3d(joints_cloud):
         title_font_color="#000000",
         title_font_size=18,
         width=1139,
-        height=527
+        height=527,
     )
     # Set all the axes parameters, based on plotly for Python
     # documentation
@@ -78,7 +68,7 @@ def render_3d(joints_cloud):
         zaxis_title_font_family="Arial",
         zaxis_title_font_color="#000000",
         zaxis_title_font_size=14,
-        camera=kinect_camera
+        camera=kinect_camera,
     )
     # Since there are some troubles rendering with other
     # methods, we convert the plotly chart into a jpg image
@@ -89,5 +79,5 @@ def render_3d(joints_cloud):
     # We convert the image to an array, so open cv can
     # interpret it
     img_arr = np.array(img)
-    cv2.imshow('joints', img_arr)
+    cv2.imshow("joints", img_arr)
     cv2.waitKey(1)

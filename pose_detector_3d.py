@@ -18,23 +18,28 @@ def create_intrinsic():
     Creates an intrinsic with default parameters for its use in Open 3D
     """
     # Hardcode the camera intrinsic parameters for backprojection
-    depth_height=424
-    depth_width=512
-    ppx=260.166
-    ppy=205.197
-    fx=367.535
-    fy=367.535
-    intrinsic = open3d.camera.PinholeCameraIntrinsic(depth_width, depth_height, fx, fy, ppx, ppy)
+    depth_height = 424
+    depth_width = 512
+    ppx = 260.166
+    ppy = 205.197
+    fx = 367.535
+    fy = 367.535
+    intrinsic = open3d.camera.PinholeCameraIntrinsic(
+        depth_width, depth_height, fx, fy, ppx, ppy
+    )
     return intrinsic
 
-def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame, kinect):
+
+def get_3d_poses(
+    dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame, kinect
+):
     """
     Uses all the retrieved data to calculate the 3d joint positions
     """
     # Final color frame with the calculated and drawn joints' coordinates
     labeled_img = None
     RGB_ss = None
-    out_dir = "./output/" + get_date()['date'] + "/"
+    out_dir = "./output/" + get_date()["date"] + "/"
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     # if data_save_cfg['original']:
@@ -55,8 +60,8 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             # Uses the resize factor to determine the coordinates of the
             # detected joints, considering the retrieved x,y coordinates
             # of the resized image
-            x_original = int(x_resized*3.2)
-            y_original = int(y_resized*3.2)
+            x_original = int(x_resized * 3.2)
+            y_original = int(y_resized * 3.2)
             # Create a tuple with the original joints' coordinates and keys
             # in case we want to store them
             # joint_info_original = [joint_key, x_original, y_original]
@@ -65,23 +70,23 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
             # calculated joint locations
             labeled = cv2.circle(
                 # Image to draw into
-                color_frames['original'],
+                color_frames["original"],
                 # Circle center coordinates
                 (x_original, y_original),
                 # Circle radius
-                int(round(dlcl_cfg['display_radius'])), 
+                int(round(dlcl_cfg["display_radius"])),
                 # Color to use for drawing (BGR)
                 get_joint_color(joint_key),
                 # thickness = -1 tells to cv to fill the circle
                 # with the color
-                thickness=-1
+                thickness=-1,
             )
             # RGB_ss = cv2.cvtColor(labeled, cv2.COLOR_BGR2RGB)
             labeled_img = Image.fromarray(labeled)
 
     # RGB_img = Image.fromarray(RGB_ss)
     # RGB_img.show()
-        
+
     if labeled_img is not None and depth_frame is not None:
         labeled_img = np.array(labeled_img)
         # Create Open 3D Point Cloud
@@ -95,25 +100,27 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         align_color_img = get_align_color_image(kinect, labeled_img)
         # Write the point cloud points and colors
         point_cloud.points, point_cloud.colors, aligned_img = create_color_point_cloud(
-            align_color_img, 
-            depth_frame, 
-            depth_scale, 
-            clipping_distance_in_meters, 
-            intrinsic
-            )
+            align_color_img,
+            depth_frame,
+            depth_scale,
+            clipping_distance_in_meters,
+            intrinsic,
+        )
 
         # aligned_img = Image.fromarray(aligned_img)
         # aligned_img.show()
         # if data_save_cfg['labeled_aligned']:
         #     save_data(data_save_cfg, aligned_img)
         # To convert [x,y,z] -> [x.-y,-z]
-        flip_transform = [[1,0,0,0], [0,-1,0,0], [0,0,-1,0], [0,0,0,1]]
+        flip_transform = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         point_cloud.transform(flip_transform)
 
         colors_RGB = np.asarray(point_cloud.colors)
         colors_RGB = denormalize_RGB(colors_RGB)
         # Merge XYZ coordinates and RGB colors
-        output_cloud = np.concatenate((np.asarray(point_cloud.points),colors_RGB), axis=1)
+        output_cloud = np.concatenate(
+            (np.asarray(point_cloud.points), colors_RGB), axis=1
+        )
 
         pose_3d, output_cloud = get_joints_points(output_cloud)
 
@@ -124,7 +131,7 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
         #     writer = csv.writer(f)
         #     writer.writerow(headers)
         #     writer.writerows(output_cloud)
-        
+
         return pose_3d, output_cloud
 
         # To change code location
@@ -137,4 +144,3 @@ def get_3d_poses(dlcl_cfg, data_save_cfg, poses_list, color_frames, depth_frame,
 
         # if data_save_cfg['colored_points']:
         #     save_data(data_save_cfg, output_cloud)
-
